@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream>
+#include <cstdio>
 #include <cstdint>
 #include <arpa/inet.h>
 #include <iomanip>      
@@ -14,33 +14,30 @@ int main(int argc, char* argv[]) {
     bool first = true;  
 
     for (int i = 1; i < argc; ++i) {
-        std::ifstream file(argv[i], std::ios::binary);
+        FILE* file = fopen(argv[i], "rb"); 
         if (!file) {
             std::cerr << "Error: Cannot open file " << argv[i] << std::endl;
             return 1;
         }
 
         uint32_t value;
-        while (file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
-            uint32_t host_value = ntohl(value); 
+        while (fread(&value, sizeof(value), 1, file) == 1) {
+            uint32_t host_value = ntohl(value);  
 
-            
             if (!first) {
                 std::cout << " + ";
             }
             first = false;
 
-  
             std::cout << host_value << "(0x" 
                       << std::hex << std::setw(4) << std::setfill('0') 
                       << host_value << std::dec << ")";
-            
+
             total_sum += host_value;
         }
 
-        file.close();
+        fclose(file); 
     }
-
 
     std::cout << " = " << total_sum << "(0x"
               << std::hex << std::setw(4) << std::setfill('0') 
@@ -48,4 +45,5 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
 
